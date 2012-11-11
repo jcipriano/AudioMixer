@@ -1,2 +1,4 @@
 AudioMixer
 ==========
+
+Developed in Chrome.
