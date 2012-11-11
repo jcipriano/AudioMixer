@@ -1,0 +1,135 @@
+---
+title: Movember Mixer
+---
+
+<script type="text/javascript">
+	
+	$(function(){
+		
+		// audio data
+		var audioFiles = [{
+			id: 'drums',
+			source: 'audio/drums'
+		},
+		{
+			id: 'classy',
+			source: 'audio/classy'
+		},
+		{
+			id: 'hillbilly',
+			source: 'audio/hillbilly'
+		},
+		{
+			id: 'porno',
+			source: 'audio/porno'
+		},
+		{
+			id: 'rocknroll',
+			source: 'audio/rocknroll'
+		}	,
+		{
+			id: 'smooth',
+			source: 'audio/smooth'
+		}];
+		
+		var mixerView = $('#mixer-view');
+		var channels = Mixer.setup(audioFiles);
+		var radius = 150;
+		var i = 0;
+		
+		var channelsToRender = [channels.classy, channels.hillbilly, channels.porno, channels.rocknroll, channels.smooth];
+		var stylePoints = [];
+		
+		// renders points
+		$.each(channelsToRender, function(key, channel){
+			
+			var angle = i * (Math.PI*2) / channelsToRender.length;
+			
+			channel.data.pos = {
+				top: Math.floor(Math.cos(angle) * radius + mixerView.height() / 2),
+				left: Math.floor(Math.sin(angle) * radius + mixerView.width() / 2)
+			};
+			
+			mixerView.append(Mustache.render('<div id="style-point-{{id}}" class="style-point" style="top: {{pos.top}}px; left: {{pos.left}}px;"><div class="content"><div class="text" onselectstart="return false;">{{id}}</div></div></div>', channel.data));
+			stylePoints[channel.data.id] = $('#mixer-view').find('#style-point-' + channel.data.id);
+			
+			i = i + 1;
+		});
+		
+		var target = $('#target');
+		var win = $(window);
+		
+		// drag behavior
+		target.mousedown(function(){
+			win.bind('mousemove', onMouseMove);
+		});
+		
+		$(window).mouseup(function(){
+			win.unbind('mousemove', onMouseMove);
+		});
+		
+		// mouse move
+		function onMouseMove(e) {
+			var offset = mixerView.offset(); 
+			var relX = e.pageX - offset.left;
+			var relY = e.pageY - offset.top;
+			
+			target.css({
+				top: relY,
+				left: relX
+			});
+			
+			setvolumes();
+		};
+		
+		// sets volume s of all channels
+		function setvolumes() {
+			var maxDistance = 175;
+			
+			$.each(channelsToRender, function(i, channel) {
+				var el = stylePoints[channel.data.id];
+				var offset = stylePoints[channel.data.id].offset();
+				var targetOffset = target.offset();
+				var distance = getDistance(offset, targetOffset);
+		
+				var inverse = maxDistance - distance
+				var p = (inverse > maxDistance ? maxDistance : (inverse < 0 ? 0 : inverse )) / maxDistance;
+		
+				channel.audio.volume = p;
+		
+				console.log(channel.data.id, p);
+			});
+		}
+		
+		// calcs distance between to positions
+		function getDistance(pos1, pos2) {
+			var o = pos1.top - pos2.top;
+			var a = pos1.left - pos2.left;
+			return Math.sqrt(o*o+a*a);
+		};
+		
+		// play all track
+		$.each(channels, function(key, channel){
+			channel.audio.volume = 0;
+			channel.audio.play();
+		});
+		channels.drums.audio.volume = 0.75;
+		setvolumes();
+		
+		// manually looping cause the loop attrib is inaccurate
+		channels.drums.el.bind('ended', function() {
+			$.each(channels, function(key, channel){
+				channel.audio.currentTime = 0;
+				channel.audio.play();
+			});
+		});
+		
+	});
+
+</script>
+
+<div id="main">
+	<div id="mixer-view">
+		<div id="target"><div class="content"><div class="text">drag me</div></div></div>
+	</div>
+</div>

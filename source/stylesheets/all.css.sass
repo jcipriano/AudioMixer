@@ -1,0 +1,68 @@
+body
+  font-family: sans-serif
+  background-color: #000
+
+#main
+  position: absolute
+  top: 50%
+  left: 0
+  width: 100%
+  
+#mixer-view
+  position: relative
+  top: -200px
+  left: 0
+  margin: 0 auto 0 auto
+  background-color:  #222
+  width: 400px
+  height:  400px
+  margin:  0 auto 0 auto
+  border: 1px solid #333
+  -moz-user-select: none
+  -webkit-user-select: none
+  
+  #target
+    position: absolute
+    top: 200px
+    left: 200px
+    cursor: pointer
+    z-index: 1
+    
+    .content
+      position: absolute
+      top: -10px
+      left: -10px
+      width: 20px
+      height: 20px
+      background-color:  #FFF
+      
+      .text
+        font-size: 10px
+        color: #CCC
+        text-align: center
+        width: 200px
+        position: relative
+        top: -20px
+        left: -100px + 20px / 2
+  
+  .style-point
+    $width: 4px
+    position: absolute
+    z-index: 0
+    
+    .content
+      position: relative
+      top: -$width / 2
+      left: -$width /2
+      background-color:  #F00
+      width: $width
+      height:  $width
+      
+      .text
+        font-size: 10px
+        color: #666
+        text-align: center
+        width: 200px
+        position: relative
+        top: -20px
+        left: -100px + $width / 2
